@@ -10,7 +10,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { useMill } from '@/hooks/useMills';
-import { useActiveProductionSessions } from '@/hooks/useProduction';
+import { useActiveProductionSessions, useEndProductionSession } from '@/hooks/useProduction';
 import LoadingScreen from '@/components/LoadingScreen';
 import ProductionEntryModal from '@/components/mill/ProductionEntryModal';
 import SiloCard from '@/components/mill/SiloCard';
@@ -23,6 +23,17 @@ export default function MillDetailPage() {
 
   const { data: mill, isLoading, error } = useMill(id);
   const { data: activeSessions } = useActiveProductionSessions(id);
+  const endSession = useEndProductionSession();
+
+  const handleEndProduction = async (sessionId: string) => {
+    if (confirm('Üretimi durdurmak istediğinizden emin misiniz?')) {
+      try {
+        await endSession.mutateAsync({ id: sessionId, status: 'completed' });
+      } catch (error) {
+        alert('Üretim durdurulamadı: ' + (error as Error).message);
+      }
+    }
+  };
 
   if (isLoading) return <LoadingScreen />;
 
@@ -127,9 +138,13 @@ export default function MillDetailPage() {
                 </div>
               </div>
             </div>
-            <button className="btn btn-danger flex items-center ml-4">
+            <button
+              onClick={() => handleEndProduction(activeSession.id)}
+              disabled={endSession.isPending}
+              className="btn btn-danger flex items-center ml-4 disabled:opacity-50"
+            >
               <StopCircle className="w-4 h-4 mr-2" />
-              Durdur
+              {endSession.isPending ? 'Durduruluyor...' : 'Durdur'}
             </button>
           </div>
         </div>

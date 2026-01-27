@@ -1,8 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { ProductionSession, ProductionSessionWithRelations } from '@/types';
+import { useRealtimeSubscription } from './useRealtimeSubscription';
 
 export function useProductionSessions(millId?: string) {
+  useRealtimeSubscription('production_sessions', ['production_sessions', millId || 'all']);
+
   return useQuery({
     queryKey: ['production_sessions', millId],
     queryFn: async () => {
@@ -30,6 +33,8 @@ export function useProductionSessions(millId?: string) {
 }
 
 export function useActiveProductionSessions(millId?: string) {
+  useRealtimeSubscription('production_sessions', ['production_sessions', 'active', millId || 'all']);
+
   return useQuery({
     queryKey: ['production_sessions', 'active', millId],
     queryFn: async () => {
