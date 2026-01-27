@@ -1,7 +1,11 @@
 import { Menu, LogOut, User } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 
-export default function Header() {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
   const { profile, signOut } = useAuthStore();
 
   const handleSignOut = async () => {
@@ -13,10 +17,9 @@ export default function Header() {
   const getRoleName = (role: string) => {
     const roleNames: Record<string, string> = {
       admin: 'Admin',
-      patron: 'Patron',
-      mudur: 'Müdür',
-      muhendis: 'Mühendis',
       operator: 'Operatör',
+      worker: 'İşçi',
+      viewer: 'Görüntüleyici',
     };
     return roleNames[role] || role;
   };
@@ -24,7 +27,10 @@ export default function Header() {
   return (
     <header className="bg-white shadow-sm">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <button className="lg:hidden">
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
           <Menu className="h-6 w-6 text-gray-600" />
         </button>
 
