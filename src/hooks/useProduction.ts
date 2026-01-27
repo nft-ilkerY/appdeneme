@@ -4,7 +4,7 @@ import type { ProductionSession, ProductionSessionWithRelations } from '@/types'
 import { useRealtimeSubscription } from './useRealtimeSubscription';
 
 export function useProductionSessions(millId?: string) {
-  useRealtimeSubscription('production_sessions', ['production_sessions', millId || 'all']);
+  useRealtimeSubscription('production_sessions', 'production_sessions');
 
   return useQuery({
     queryKey: ['production_sessions', millId],
@@ -33,7 +33,7 @@ export function useProductionSessions(millId?: string) {
 }
 
 export function useActiveProductionSessions(millId?: string) {
-  useRealtimeSubscription('production_sessions', ['production_sessions', 'active', millId || 'all']);
+  useRealtimeSubscription('production_sessions', 'production_sessions');
 
   return useQuery({
     queryKey: ['production_sessions', 'active', millId],

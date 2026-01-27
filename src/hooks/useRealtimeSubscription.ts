@@ -3,15 +3,17 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
-export function useRealtimeSubscription(table: string, queryKey: string[]) {
+export function useRealtimeSubscription(table: string, queryKeyPrefix: string) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
     let channel: RealtimeChannel;
 
+    console.log(`🔴 [Realtime] Subscribing to table: ${table}`);
+
     // Subscribe to changes
     channel = supabase
-      .channel(`${table}_changes`)
+      .channel(`${table}_changes_${Math.random()}`) // Unique channel name
       .on(
         'postgres_changes',
         {
@@ -20,18 +22,25 @@ export function useRealtimeSubscription(table: string, queryKey: string[]) {
           table: table,
         },
         (payload) => {
-          console.log(`Realtime update on ${table}:`, payload);
-          // Invalidate query to refetch data
-          queryClient.invalidateQueries({ queryKey });
+          console.log(`🟢 [Realtime] Update received on ${table}:`, payload.eventType, payload);
+
+          // Invalidate ALL queries that match the prefix
+          queryClient.invalidateQueries({
+            queryKey: [queryKeyPrefix],
+            refetchType: 'active' // Only refetch active queries
+          });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`🔵 [Realtime] Subscription status for ${table}:`, status);
+      });
 
     // Cleanup
     return () => {
+      console.log(`🟡 [Realtime] Unsubscribing from ${table}`);
       if (channel) {
         supabase.removeChannel(channel);
       }
     };
-  }, [table, queryClient, queryKey]);
+  }, [table, queryClient, queryKeyPrefix]);
 }
