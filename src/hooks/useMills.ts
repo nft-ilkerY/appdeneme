@@ -1,8 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Mill, MillWithRelations } from '@/types';
+import { useRealtimeSubscription } from './useRealtimeSubscription';
 
 export function useMills() {
+  // Subscribe to mills table changes
+  useRealtimeSubscription('mills', 'mills');
+  // Also subscribe to production_sessions to update when sessions start/stop
+  useRealtimeSubscription('production_sessions', 'mills');
+
   return useQuery({
     queryKey: ['mills'],
     queryFn: async () => {
