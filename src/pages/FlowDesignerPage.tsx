@@ -63,8 +63,18 @@ export default function FlowDesignerPage() {
   }, [mills, selectedMillId]);
 
   // Seçili değirmene göre nodes oluştur
-  useMemo(() => {
-    if (!entities || !selectedMillId) return;
+  useEffect(() => {
+    if (!entities || !selectedMillId) {
+      console.log('Nodes oluşturulamadı:', { entities: !!entities, selectedMillId });
+      return;
+    }
+
+    console.log('Nodes oluşturuluyor...', {
+      selectedMillId,
+      millsCount: entities.mills.length,
+      silosCount: entities.silos.length,
+      flowNodesCount: flowNodes?.length || 0
+    });
 
     const newNodes: Node[] = [];
     const flowNodesMap = new Map(
@@ -85,6 +95,7 @@ export default function FlowDesignerPage() {
           : { x: 100, y: 100 },
         data: { mill: selectedMill, label: selectedMill.name },
       });
+      console.log('Değirmen eklendi:', selectedMill.name);
     }
 
     // Bu değirmene bağlı siloları ekle (mill_id veya flow_connections'a bakarak)
@@ -101,28 +112,34 @@ export default function FlowDesignerPage() {
     });
 
     // Ayrıca mill_id'ye göre de ekle
-    entities.silos
-      .filter((s) => s.mill_id === selectedMillId || connectedSiloIds.has(s.id))
-      .forEach((silo) => {
-        const nodeId = `silo-${silo.id}`;
-        const flowNode = flowNodesMap.get(nodeId);
+    const silosForMill = entities.silos.filter((s) => s.mill_id === selectedMillId || connectedSiloIds.has(s.id));
+    console.log(`${silosForMill.length} silo bulundu:`, silosForMill.map(s => s.name));
 
-        newNodes.push({
-          id: nodeId,
-          type: 'silo',
-          position: flowNode
-            ? { x: flowNode.position_x, y: flowNode.position_y }
-            : { x: 100 + newNodes.length * 250, y: 400 },
-          data: { silo, label: silo.name },
-        });
+    silosForMill.forEach((silo) => {
+      const nodeId = `silo-${silo.id}`;
+      const flowNode = flowNodesMap.get(nodeId);
+
+      newNodes.push({
+        id: nodeId,
+        type: 'silo',
+        position: flowNode
+          ? { x: flowNode.position_x, y: flowNode.position_y }
+          : { x: 100 + newNodes.length * 250, y: 400 },
+        data: { silo, label: silo.name },
       });
+      console.log('Silo eklendi:', silo.name, nodeId);
+    });
 
+    console.log('Toplam node sayısı:', newNodes.length);
     setNodes(newNodes);
   }, [flowNodes, flowConnections, entities, selectedMillId, setNodes]);
 
   // Seçili değirmene göre edges oluştur
-  useMemo(() => {
-    if (!flowConnections || !selectedMillId) return;
+  useEffect(() => {
+    if (!flowConnections || !selectedMillId) {
+      console.log('Edges oluşturulamadı:', { flowConnections: !!flowConnections, selectedMillId });
+      return;
+    }
 
     const newEdges: Edge[] = flowConnections
       .filter((conn) => {
@@ -154,6 +171,7 @@ export default function FlowDesignerPage() {
         },
       }));
 
+    console.log('Edges oluşturuldu:', newEdges.length);
     setEdges(newEdges);
   }, [flowConnections, selectedMillId, nodes, setEdges]);
 
