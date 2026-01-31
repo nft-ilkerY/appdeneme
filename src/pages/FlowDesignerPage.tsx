@@ -279,9 +279,9 @@ export default function FlowDesignerPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
       {/* Üst Toolbar - Değirmen Seçimi ve Butonlar */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white border-b border-gray-200 flex-shrink-0">
         {/* Değirmen Tabs */}
         <div className="border-b border-gray-200">
           <div className="flex items-center px-6 py-2 overflow-x-auto">
