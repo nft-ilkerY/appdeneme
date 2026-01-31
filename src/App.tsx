@@ -12,6 +12,7 @@ import PackagingPage from '@/pages/PackagingPage';
 import ReportsPage from '@/pages/ReportsPage';
 import AdminPage from '@/pages/AdminPage';
 import SettingsPage from '@/pages/SettingsPage';
+import FlowDesignerPage from '@/pages/FlowDesignerPage';
 import LoadingScreen from '@/components/LoadingScreen';
 import OfflineIndicator from '@/components/OfflineIndicator';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
@@ -67,6 +68,7 @@ function App() {
           <Route path="silos/:id" element={<SiloDetailPage />} />
           <Route path="packaging" element={<PackagingPage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="flow-designer" element={<FlowDesignerPage />} />
           <Route path="admin" element={<AdminPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>

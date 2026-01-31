@@ -453,6 +453,91 @@ export interface Database {
           }
         ]
       }
+      flow_nodes: {
+        Row: {
+          id: string
+          entity_id: string
+          entity_type: 'mill' | 'silo' | 'coating' | 'output'
+          position_x: number
+          position_y: number
+          ui_data: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          entity_id: string
+          entity_type: 'mill' | 'silo' | 'coating' | 'output'
+          position_x?: number
+          position_y?: number
+          ui_data?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          entity_id?: string
+          entity_type?: 'mill' | 'silo' | 'coating' | 'output'
+          position_x?: number
+          position_y?: number
+          ui_data?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      flow_connections: {
+        Row: {
+          id: string
+          source_id: string
+          source_type: 'mill' | 'silo' | 'coating' | 'output'
+          source_handle: string | null
+          target_id: string
+          target_type: 'mill' | 'silo' | 'coating' | 'output'
+          target_handle: string | null
+          connection_rules: Json | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          source_id: string
+          source_type: 'mill' | 'silo' | 'coating' | 'output'
+          source_handle?: string | null
+          target_id: string
+          target_type: 'mill' | 'silo' | 'coating' | 'output'
+          target_handle?: string | null
+          connection_rules?: Json | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          source_id?: string
+          source_type?: 'mill' | 'silo' | 'coating' | 'output'
+          source_handle?: string | null
+          target_id?: string
+          target_type?: 'mill' | 'silo' | 'coating' | 'output'
+          target_handle?: string | null
+          connection_rules?: Json | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flow_connections_created_by_fkey"
+            columns: ["created_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -465,6 +550,7 @@ export interface Database {
       silo_type: 'mill_product' | 'coating_raw' | 'coating_product'
       package_type: 'BB' | 'PP' | 'KRAFT'
       production_status: 'active' | 'paused' | 'completed' | 'cancelled'
+      entity_type: 'mill' | 'silo' | 'coating' | 'output'
     }
     CompositeTypes: {
       [_ in never]: never

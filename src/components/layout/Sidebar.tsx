@@ -8,6 +8,7 @@ import {
   Settings,
   Shield,
   X,
+  Workflow,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 
@@ -29,6 +30,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   ];
 
   if (profile?.role === 'admin') {
+    navigation.splice(5, 0, { name: 'Akış Tasarımı', to: '/flow-designer', icon: Workflow });
     navigation.push({ name: 'Admin Panel', to: '/admin', icon: Shield });
   }
 
