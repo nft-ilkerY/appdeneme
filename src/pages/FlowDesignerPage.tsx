@@ -27,7 +27,13 @@ import { useMills } from '@/hooks/useMills';
 import MillNode from '@/components/flow/MillNode';
 import SiloNode from '@/components/flow/SiloNode';
 import AddEntityModal from '@/components/flow/AddEntityModal';
+import EditMillModal from '@/components/flow/EditMillModal';
+import EditSiloModal from '@/components/flow/EditSiloModal';
 import LoadingScreen from '@/components/LoadingScreen';
+import type { Database } from '@/types/database';
+
+type Mill = Database['public']['Tables']['mills']['Row'];
+type Silo = Database['public']['Tables']['silos']['Row'];
 
 const nodeTypes = {
   mill: MillNode,
@@ -38,6 +44,8 @@ export default function FlowDesignerPage() {
   const [selectedMillId, setSelectedMillId] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [editingMill, setEditingMill] = useState<Mill | null>(null);
+  const [editingSilo, setEditingSilo] = useState<Silo | null>(null);
 
   // Data hooks
   const { data: mills, isLoading: millsLoading } = useMills();
@@ -179,6 +187,19 @@ export default function FlowDesignerPage() {
   const handleNodeDragStop = useCallback(() => {
     setHasUnsavedChanges(true);
   }, []);
+
+  // Node'a tıklandığında düzenleme modalını aç
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    const { entityType, entityId } = parseNodeId(node.id);
+
+    if (entityType === 'mill') {
+      const mill = entities?.mills.find((m) => m.id === entityId);
+      if (mill) setEditingMill(mill);
+    } else if (entityType === 'silo') {
+      const silo = entities?.silos.find((s) => s.id === entityId);
+      if (silo) setEditingSilo(silo);
+    }
+  }, [entities]);
 
   // Helper function: node.id'den entity type ve ID'yi ayır
   const parseNodeId = (nodeId: string): { entityType: string; entityId: string } => {
@@ -369,6 +390,7 @@ export default function FlowDesignerPage() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onNodeClick={onNodeClick}
           onNodeDragStop={handleNodeDragStop}
           onEdgesDelete={onEdgesDelete}
           nodeTypes={nodeTypes}
@@ -392,6 +414,24 @@ export default function FlowDesignerPage() {
         onClose={() => setIsAddModalOpen(false)}
         selectedMillId={selectedMillId || undefined}
       />
+
+      {/* Edit Mill Modal */}
+      {editingMill && (
+        <EditMillModal
+          isOpen={!!editingMill}
+          onClose={() => setEditingMill(null)}
+          mill={editingMill}
+        />
+      )}
+
+      {/* Edit Silo Modal */}
+      {editingSilo && (
+        <EditSiloModal
+          isOpen={!!editingSilo}
+          onClose={() => setEditingSilo(null)}
+          silo={editingSilo}
+        />
+      )}
     </div>
   );
 }

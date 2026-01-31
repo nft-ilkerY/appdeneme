@@ -1,13 +1,20 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Filter, AlertCircle } from 'lucide-react';
+import { Container, Filter, AlertCircle, Edit } from 'lucide-react';
 import { useSilos } from '@/hooks/useSilos';
 import { useMills } from '@/hooks/useMills';
 import LoadingScreen from '@/components/LoadingScreen';
+import EditSiloModal from '@/components/flow/EditSiloModal';
+import type { Database } from '@/types/database';
+
+type Silo = Database['public']['Tables']['silos']['Row'] & {
+  mill?: { id: string; name: string; code: string };
+};
 
 export default function SilosPage() {
   const [filterMill, setFilterMill] = useState<string>('all');
   const [filterActive, setFilterActive] = useState<string>('all');
+  const [editingSilo, setEditingSilo] = useState<Silo | null>(null);
 
   const { data: silos, isLoading, error } = useSilos();
   const { data: mills } = useMills();
@@ -117,34 +124,46 @@ export default function SilosPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredSilos.map((silo) => (
-            <Link
+            <div
               key={silo.id}
-              to={`/silos/${silo.id}`}
-              className={`card hover:shadow-md transition-shadow ${
+              className={`card hover:shadow-md transition-shadow relative ${
                 !silo.is_active ? 'opacity-60' : ''
               }`}
             >
+              {/* Edit Button */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setEditingSilo(silo);
+                }}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                title="Düzenle"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+
               {/* Header */}
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center">
-                  <Container className="w-8 h-8 text-primary-600 mr-3" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{silo.code}</h4>
-                    <p className="text-xs text-gray-600">
-                      {getSiloTypeName(silo.type)}
-                    </p>
+              <Link to={`/silos/${silo.id}`} className="block">
+                <div className="flex items-start justify-between mb-4 pr-10">
+                  <div className="flex items-center">
+                    <Container className="w-8 h-8 text-primary-600 mr-3" />
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{silo.code}</h4>
+                      <p className="text-xs text-gray-600">
+                        {getSiloTypeName(silo.type)}
+                      </p>
+                    </div>
                   </div>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      silo.is_active
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {silo.is_active ? 'Aktif' : 'Pasif'}
+                  </span>
                 </div>
-                <span
-                  className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    silo.is_active
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}
-                >
-                  {silo.is_active ? 'Aktif' : 'Pasif'}
-                </span>
-              </div>
 
               {/* Mill Info */}
               {silo.mill && (
@@ -195,8 +214,18 @@ export default function SilosPage() {
                 </div>
               </div>
             </Link>
+            </div>
           ))}
         </div>
+      )}
+
+      {/* Edit Silo Modal */}
+      {editingSilo && (
+        <EditSiloModal
+          isOpen={!!editingSilo}
+          onClose={() => setEditingSilo(null)}
+          silo={editingSilo}
+        />
       )}
 
       {/* Summary Stats */}
