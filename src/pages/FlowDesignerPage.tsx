@@ -261,46 +261,40 @@ export default function FlowDesignerPage() {
   }
 
   return (
-    <div className="-m-6 lg:-m-8 flex h-[calc(100vh-4rem)]">
-      {/* Sol Sidebar - Değirmen Listesi */}
-      <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200 bg-white">
-          <h2 className="font-bold text-gray-900 flex items-center gap-2">
-            <Factory className="w-5 h-5" />
-            Değirmenler
-          </h2>
-          <p className="text-xs text-gray-600 mt-1">Akış tasarımını görüntüle</p>
+    <div className="flex flex-col h-full">
+      {/* Üst Toolbar - Değirmen Seçimi ve Butonlar */}
+      <div className="bg-white border-b border-gray-200">
+        {/* Değirmen Tabs */}
+        <div className="border-b border-gray-200">
+          <div className="flex items-center px-6 py-2 overflow-x-auto">
+            <div className="flex items-center gap-2 mr-4 flex-shrink-0">
+              <Factory className="w-5 h-5 text-gray-600" />
+              <span className="font-semibold text-gray-700 text-sm">Değirmenler:</span>
+            </div>
+            <div className="flex gap-2">
+              {mills?.map((mill) => (
+                <button
+                  key={mill.id}
+                  onClick={() => setSelectedMillId(mill.id)}
+                  className={`px-4 py-2 rounded-t-lg transition-all whitespace-nowrap text-sm font-medium ${
+                    selectedMillId === mill.id
+                      ? 'bg-blue-100 text-blue-900 border-b-2 border-blue-600'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {selectedMillId === mill.id && <Check className="w-4 h-4" />}
+                    <span>{mill.name}</span>
+                    <span className="text-xs opacity-70">({mill.code})</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2">
-          {mills?.map((mill) => (
-            <button
-              key={mill.id}
-              onClick={() => setSelectedMillId(mill.id)}
-              className={`w-full text-left p-3 rounded-lg mb-2 transition-all ${
-                selectedMillId === mill.id
-                  ? 'bg-blue-100 border-2 border-blue-500 shadow-sm'
-                  : 'bg-white border border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 text-sm">{mill.name}</div>
-                  <div className="text-xs text-gray-600">{mill.code}</div>
-                </div>
-                {selectedMillId === mill.id && (
-                  <Check className="w-4 h-4 text-blue-600" />
-                )}
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Sağ Taraf - Canvas */}
-      <div className="flex-1 flex flex-col">
-        {/* Header / Toolbar */}
-        <div className="bg-white border-b border-gray-200 px-6 py-3">
+        {/* Toolbar - Butonlar */}
+        <div className="px-6 py-3">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-gray-900">
@@ -347,35 +341,39 @@ export default function FlowDesignerPage() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* React Flow Canvas */}
-        <div className="flex-1">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeDragStop={handleNodeDragStop}
-            onEdgesDelete={onEdgesDelete}
-            nodeTypes={nodeTypes}
-            fitView
-            deleteKeyCode="Delete"
-          >
-            <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
-            <Controls />
-            <MiniMap
-              nodeStrokeWidth={3}
-              zoomable
-              pannable
-              className="bg-gray-100"
-            />
-          </ReactFlow>
-        </div>
+      {/* React Flow Canvas */}
+      <div className="flex-1">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeDragStop={handleNodeDragStop}
+          onEdgesDelete={onEdgesDelete}
+          nodeTypes={nodeTypes}
+          fitView
+          deleteKeyCode="Delete"
+        >
+          <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
+          <Controls />
+          <MiniMap
+            nodeStrokeWidth={3}
+            zoomable
+            pannable
+            className="bg-gray-100"
+          />
+        </ReactFlow>
       </div>
 
       {/* Add Entity Modal */}
-      <AddEntityModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+      <AddEntityModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        selectedMillId={selectedMillId || undefined}
+      />
     </div>
   );
 }

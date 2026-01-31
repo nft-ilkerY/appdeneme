@@ -3,6 +3,7 @@ import { X, Factory, Container } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
+import { useMills } from '@/hooks/useMills';
 
 type MillInsert = Database['public']['Tables']['mills']['Insert'];
 type SiloInsert = Database['public']['Tables']['silos']['Insert'];
@@ -10,11 +11,13 @@ type SiloInsert = Database['public']['Tables']['silos']['Insert'];
 interface AddEntityModalProps {
   isOpen: boolean;
   onClose: () => void;
+  selectedMillId?: string;
 }
 
-export default function AddEntityModal({ isOpen, onClose }: AddEntityModalProps) {
+export default function AddEntityModal({ isOpen, onClose, selectedMillId }: AddEntityModalProps) {
   const [entityType, setEntityType] = useState<'mill' | 'silo'>('mill');
   const queryClient = useQueryClient();
+  const { data: mills } = useMills();
 
   // Mill form state
   const [millData, setMillData] = useState<Partial<MillInsert>>({
@@ -34,6 +37,7 @@ export default function AddEntityModal({ isOpen, onClose }: AddEntityModalProps)
     type: 'mill_product',
     capacity_meters: null,
     capacity_tons: null,
+    mill_id: selectedMillId || null,
     is_active: true,
   });
 
@@ -63,6 +67,7 @@ export default function AddEntityModal({ isOpen, onClose }: AddEntityModalProps)
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all_entities'] });
       queryClient.invalidateQueries({ queryKey: ['flow_nodes'] });
+      queryClient.invalidateQueries({ queryKey: ['mills'] });
       resetForm();
       onClose();
     },
@@ -94,6 +99,8 @@ export default function AddEntityModal({ isOpen, onClose }: AddEntityModalProps)
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all_entities'] });
       queryClient.invalidateQueries({ queryKey: ['flow_nodes'] });
+      queryClient.invalidateQueries({ queryKey: ['silos'] });
+      queryClient.invalidateQueries({ queryKey: ['mills'] });
       resetForm();
       onClose();
     },
@@ -115,6 +122,7 @@ export default function AddEntityModal({ isOpen, onClose }: AddEntityModalProps)
       type: 'mill_product',
       capacity_meters: null,
       capacity_tons: null,
+      mill_id: selectedMillId || null,
       is_active: true,
     });
   };
@@ -310,19 +318,38 @@ export default function AddEntityModal({ isOpen, onClose }: AddEntityModalProps)
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tip *
-                </label>
-                <select
-                  value={siloData.type}
-                  onChange={(e) => setSiloData({ ...siloData, type: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  <option value="mill_product">Değirmen Ürün Silosu</option>
-                  <option value="coating_raw">Kaplama Hammadde Silosu</option>
-                  <option value="coating_product">Kaplama Ürün Silosu</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tip *
+                  </label>
+                  <select
+                    value={siloData.type}
+                    onChange={(e) => setSiloData({ ...siloData, type: e.target.value as any })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="mill_product">Değirmen Ürün Silosu</option>
+                    <option value="coating_raw">Kaplama Hammadde Silosu</option>
+                    <option value="coating_product">Kaplama Ürün Silosu</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Değirmen
+                  </label>
+                  <select
+                    value={siloData.mill_id || ''}
+                    onChange={(e) => setSiloData({ ...siloData, mill_id: e.target.value || null })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="">Seçiniz (Opsiyonel)</option>
+                    {mills?.map((mill) => (
+                      <option key={mill.id} value={mill.id}>
+                        {mill.name} ({mill.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
